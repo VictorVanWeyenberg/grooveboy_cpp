@@ -17,6 +17,14 @@ public:
     uint16_t  cnt;
 };
 
+static std::deque<DMA_Entry*> make_pool() {
+    std::deque<DMA_Entry*> pool;
+    for (size_t index = 0; index < 8; ++index) {
+        pool.push_back(new DMA_Entry(nullptr, nullptr, 0));
+    }
+    return pool;
+}
+
 class DMA_Controller {
 public:
     void push(uint8_t channel, void* src, void* dst, uint16_t cnt);
@@ -25,7 +33,7 @@ public:
 private:
     std::deque<DMA_Entry*> queues[4];
     DMA_Entry* busies[4] = {nullptr};
-    std::deque<DMA_Entry*> unused = std::deque(8, new DMA_Entry(nullptr, nullptr, 0));
+    std::deque<DMA_Entry*> unused = make_pool();
 };
 
 class DMA_Channel {
