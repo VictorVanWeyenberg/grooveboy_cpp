@@ -1,9 +1,9 @@
 #include "dma.h"
 #include "pal.h"
 
-extern Color* background_palette_start;
+extern uint16_t* background_palette_start;
 extern uint16_t background_palette_size;
-extern Color* object_palette_start;
+extern uint16_t* object_palette_start;
 extern uint16_t object_palette_size;
 
 void load_palettes() {
