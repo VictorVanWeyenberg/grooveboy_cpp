@@ -1,7 +1,5 @@
-#ifndef GROOVEBOY_BG_H
-#define GROOVEBOY_BG_H
-
-#include <cstdint>
+#ifndef GROOVEBOY_IO_H
+#define GROOVEBOY_IO_H
 
 #define MEM_IO 0x04000000
 #define BG0CNT (*((volatile uint16_t *)(MEM_IO + 0x8)))
@@ -10,7 +8,6 @@
 #define BG3CNT (*((volatile uint16_t *)(MEM_IO + 0xE)))
 
 #define REG_DISPLAY   (*((volatile uint16_t *)(MEM_IO)))
-#define REG_VCOUNT    (*(volatile uint16_t *)0x04000006)
 
 #define BG_MODE_0 0
 #define BG_MODE_1 1
@@ -40,24 +37,6 @@
 #define BGCNT_PRIORITY_2 2
 #define BGCNT_PRIORITY_3 3
 
-#define MEM_VRAM 0x06000000
-
-#define BG0_SCREEN_BASE 29
-#define BG1_SCREEN_BASE 30
-
-#define MEM_BG0_SCREEN_BLOCK ((uint16_t*)(MEM_VRAM + BG0_SCREEN_BASE * 0x800))
-#define MEM_BG1_SCREEN_BLOCK ((uint16_t*)(MEM_VRAM + BG1_SCREEN_BASE * 0x800))
-
-#define BG0_CHARACTER_BASE 0
-#define BG1_CHARACTER_BASE 1
-
-#define MEM_BG0_CHARACTER_BLOCK ((uint16_t*)(MEM_VRAM + BG0_CHARACTER_BASE * 0x4000))
-#define MEM_BG1_CHARACTER_BLOCK ((uint16_t*)(MEM_VRAM + BG1_CHARACTER_BASE * 0x4000))
-
-#define OBJ_CHARACTER_BLOCK ((uint16_t*)(MEM_VRAM + 0x10000))
-
 void init_bg();
-void set_character_data(uint8_t bg, void* start, uint16_t size);
-void set_screen_data(uint8_t bg, void* start, uint16_t size);
 
-#endif //GROOVEBOY_BG_H
+#endif //GROOVEBOY_IO_H

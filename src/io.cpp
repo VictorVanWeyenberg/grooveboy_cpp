@@ -1,5 +1,5 @@
-#include "bg.h"
-#include "dma.h"
+#include "io.h"
+#include "vram.h"
 
 extern uint16_t *BG00_character_data_start;
 extern uint16_t BG00_character_data_size;
@@ -24,28 +24,4 @@ void init_bg() {
 
     set_screen_data(0, &empty_art_BG00_screen_data_start, empty_art_BG00_screen_data_size);
     set_screen_data(1, &empty_art_BG01_screen_data_start, empty_art_BG01_screen_data_size);
-}
-
-void set_character_data(const uint8_t bg, void* start, const uint16_t size) {
-    switch (bg) {
-        case 0:
-            dma_push(0, start, MEM_BG0_CHARACTER_BLOCK, size);
-            break;
-        case 1:
-            dma_push(0, start, MEM_BG1_CHARACTER_BLOCK, size);
-            break;
-        default: break;
-    }
-}
-
-void set_screen_data(const uint8_t bg, void* start, const uint16_t size) {
-    switch (bg) {
-        case 0:
-            dma_push(0, start, MEM_BG0_SCREEN_BLOCK, size);
-            break;
-        case 1:
-            dma_push(0, start, MEM_BG1_SCREEN_BLOCK, size);
-            break;
-        default: break;
-    }
 }
