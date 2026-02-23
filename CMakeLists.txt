@@ -51,6 +51,12 @@ file(GLOB_RECURSE SOURCES "${SRC_DIR}/*.cpp")
 file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.h")
 
 # Collect binary files
+if (EXISTS "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/")
+    file(GLOB ORIG_BIN_FILES "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/bin/*.bin")
+    file(COPY ${ORIG_BIN_FILES} DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
+    file(COPY "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/structure.json" DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
+endif()
+
 file(GLOB BIN_FILES "${BIN_DIR}/*.bin")
 
 # Function to convert binary files to object files with clean symbol names
