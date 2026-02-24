@@ -1,12 +1,12 @@
 #include "io.h"
 #include "int.h"
-#include "pal.h"
+#include "ui.h"
 
 [[noreturn]]
 int main() {
     init_bg();
     init_interrupts();
-    load_palettes();
+    edit_ui().render();
 
     for (;;) {}
 }

@@ -4,36 +4,34 @@
 #include <cstdint>
 #include <deque>
 
+#include "bin.h"
+
 class DMA_Entry {
 public:
-    DMA_Entry(void *src, void *dst, const uint16_t cnt)
-        : src(src),
-          dst(dst),
-          cnt(cnt) {
-    }
-
-    void     *src;
-    void     *dst;
-    uint16_t  cnt;
+    Binary data;
+    void *dst = nullptr;
 };
 
-static std::deque<DMA_Entry*> make_pool() {
-    std::deque<DMA_Entry*> pool;
+static std::deque<DMA_Entry *> make_pool() {
+    std::deque<DMA_Entry *> pool;
     for (size_t index = 0; index < 8; ++index) {
-        pool.push_back(new DMA_Entry(nullptr, nullptr, 0));
+        pool.push_back(new DMA_Entry());
     }
     return pool;
 }
 
 class DMA_Controller {
 public:
-    void push(uint8_t channel, void* src, void* dst, uint16_t cnt);
+    void push(uint8_t channel, Binary data, void *dst);
+
     void cycle(uint8_t channel);
+
     void interrupt(uint8_t channel);
+
 private:
-    std::deque<DMA_Entry*> queues[4];
-    DMA_Entry* busies[4] = {nullptr};
-    std::deque<DMA_Entry*> unused = make_pool();
+    std::deque<DMA_Entry *> queues[4];
+    DMA_Entry *busies[4] = {nullptr};
+    std::deque<DMA_Entry *> unused = make_pool();
 };
 
 class DMA_Channel {
@@ -52,6 +50,6 @@ public:
 #define DMA_INT (1 << 14)
 #define DMA_ON (1 << 15)
 
-void dma_push(uint8_t channel, void* src, void* dst, uint16_t cnt);
+void dma_push(uint8_t channel, Binary data, void *dst);
 
 #endif //GROOVEBOY_DMA_H

@@ -2,6 +2,7 @@
 #define GROOVEBOY_VRAM_H
 
 #include <cstdint>
+#include "bin.h"
 
 #define MEM_VRAM 0x06000000
 
@@ -19,7 +20,7 @@
 
 #define OBJ_CHARACTER_BLOCK ((uint16_t*)(MEM_VRAM + 0x10000))
 
-void set_character_data(uint8_t bg, void* start, uint16_t size);
-void set_screen_data(uint8_t bg, void* start, uint16_t size);
+void write_character_data(uint8_t bg, Binary data);
+void write_screen_data(uint8_t bg, Binary data);
 
 #endif //GROOVEBOY_VRAM_H

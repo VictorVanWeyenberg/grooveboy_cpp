@@ -6,6 +6,7 @@
 #define MEM_BG_PAL ((uint16_t *)(MEM_PAL))
 #define MEM_OBJ_PAL ((uint16_t *)(MEM_PAL + 0x200))
 
-void load_palettes();
+void write_background_palette(Binary data);
+void write_object_palette(Binary data);
 
 #endif

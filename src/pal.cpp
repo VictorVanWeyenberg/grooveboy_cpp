@@ -1,12 +1,10 @@
 #include "dma.h"
 #include "pal.h"
 
-extern uint16_t* background_palette_start;
-extern uint16_t background_palette_size;
-extern uint16_t* object_palette_start;
-extern uint16_t object_palette_size;
+void write_background_palette(const Binary data) {
+    dma_push(0, data, MEM_BG_PAL);
+}
 
-void load_palettes() {
-    dma_push(0, &background_palette_start, MEM_BG_PAL, background_palette_size);
-    dma_push(0, &object_palette_start, MEM_OBJ_PAL, object_palette_size);
+void write_object_palette(const Binary data) {
+    dma_push(0, data, MEM_OBJ_PAL);
 }
