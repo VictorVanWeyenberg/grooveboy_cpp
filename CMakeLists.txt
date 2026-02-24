@@ -6,13 +6,13 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_BUILD_TYPE Release)
 
 # DevkitPro environment variables
-if(NOT DEFINED ENV{DEVKITPRO})
+if (NOT DEFINED ENV{DEVKITPRO})
     message(FATAL_ERROR "DEVKITPRO environment variable is not set. Please set it to your devkitPro installation directory.")
-endif()
+endif ()
 
-if(NOT DEFINED ENV{DEVKITARM})
+if (NOT DEFINED ENV{DEVKITARM})
     message(FATAL_ERROR "DEVKITARM environment variable is not set. Please set it to your devkitARM installation directory.")
-endif()
+endif ()
 
 # Set compilers
 set(CMAKE_CXX_COMPILER "$ENV{DEVKITARM}/bin/arm-none-eabi-g++")
@@ -24,7 +24,7 @@ set(RAW2C "$ENV{DEVKITPRO}/tools/bin/raw2c")
 # Skip compiler checks (cross-compilation)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
-project(GrooveBoy CXX)
+project(grooveboy CXX)
 
 # C++ standard
 set(CMAKE_CXX_STANDARD 26)
@@ -55,7 +55,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/")
     file(GLOB ORIG_BIN_FILES "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/bin/*.bin")
     file(COPY ${ORIG_BIN_FILES} DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
     file(COPY "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/structure.json" DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
-endif()
+endif ()
 
 file(GLOB BIN_FILES "${BIN_DIR}/*.bin")
 
@@ -99,9 +99,9 @@ add_executable(grooveboy ${SOURCES} ${HEADERS})
 target_include_directories(grooveboy PRIVATE ${INCLUDE_DIR})
 
 # Add binary data files as embedded resources
-foreach(bin_file ${BIN_FILES})
+foreach (bin_file ${BIN_FILES})
     add_binary_data(grooveboy ${bin_file})
-endforeach()
+endforeach ()
 
 # Convert ELF to GBA ROM
 add_custom_command(

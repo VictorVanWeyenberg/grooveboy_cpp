@@ -25,6 +25,20 @@ private:
     Binary screen_data[2];
 };
 
+struct Boop {
+    uint8_t sx;
+    uint8_t sy;
+    uint8_t ex;
+    uint8_t ey;
+    uint8_t north;
+    uint8_t east;
+    uint8_t south;
+    uint8_t west;
+    uint8_t callback_index;
+    uint8_t args_index;
+    uint8_t args_len;
+};
+
 UI edit_ui();
 
 #endif //GROOVEBOY_UI_H
