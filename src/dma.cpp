@@ -5,7 +5,7 @@
 
 static DMA_Controller DMAC;
 
-void DMA_Controller::push(const uint8_t channel, const Binary data, void *dst) {
+void DMA_Controller::push(const uint8_t channel, const Binary data, intptr_t dst) {
     if (unused.empty()) {
         return;
     }
@@ -13,6 +13,22 @@ void DMA_Controller::push(const uint8_t channel, const Binary data, void *dst) {
     unused.pop_front();
     entry->data = data;
     entry->dst = dst;
+    entry->inc_src = true;
+    this->queues[channel].push_back(entry);
+    if (!this->busies[channel]) {
+        cycle(channel);
+    }
+}
+
+void DMA_Controller::zero(const uint8_t channel, const uint16_t size, const intptr_t dst) {
+    if (unused.empty()) {
+        return;
+    }
+    DMA_Entry *entry = unused.front();
+    unused.pop_front();
+    entry->data = Binary(nullptr, size);
+    entry->dst = dst;
+    entry->inc_src = false;
     this->queues[channel].push_back(entry);
     if (!this->busies[channel]) {
         cycle(channel);
@@ -28,9 +44,12 @@ void DMA_Controller::cycle(const uint8_t channel) {
     this->busies[channel] = entry;
     DMA[channel].cnt_h = 0;
     DMA[channel].src = reinterpret_cast<intptr_t>(entry->data.start);
-    DMA[channel].dst = reinterpret_cast<intptr_t>(entry->dst);
+    DMA[channel].dst = entry->dst;
     DMA[channel].cnt_l = entry->data.size >> 1; // TRANSFER_16
-    DMA[channel].cnt_h = 0 | DMA_INT | DMA_ON;
+    if (entry->inc_src) {
+        DMA[channel].cnt_h |= DMA_SRC_INC;
+    }
+    DMA[channel].cnt_h |= DMA_INT | DMA_ON;
 }
 
 void DMA_Controller::interrupt(const uint8_t channel) {
@@ -42,8 +61,12 @@ void DMA_Controller::interrupt(const uint8_t channel) {
     cycle(channel);
 }
 
-void dma_push(const uint8_t channel, const Binary data, void* dst) {
+void dma_push_(const uint8_t channel, const Binary data, const intptr_t dst) {
     DMAC.push(channel, data, dst);
+}
+
+void dma_zero_(const uint8_t channel, const uint16_t size, const intptr_t dst) {
+    DMAC.zero(channel, size, dst);
 }
 
 void dma_interrupt(const uint8_t channel) {

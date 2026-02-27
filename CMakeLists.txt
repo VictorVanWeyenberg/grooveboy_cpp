@@ -33,7 +33,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GBA-specific compiler flags
 set(GBA_ARCH_FLAGS "-marm -mthumb-interwork -mcpu=arm7tdmi -mtune=arm7tdmi -mfloat-abi=softfp -mlong-calls -fno-exceptions -ffunction-sections")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GBA_ARCH_FLAGS} -Wall -Wextra -Wno-unused -pedantic -ffast-math -Wl,--verbose")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GBA_ARCH_FLAGS} -Wall -Wextra -Wno-unused -pedantic -ffast-math -W")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
