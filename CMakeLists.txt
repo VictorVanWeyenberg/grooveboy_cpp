@@ -32,8 +32,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GBA-specific compiler flags
-set(GBA_ARCH_FLAGS "-marm -mthumb-interwork -mcpu=arm7tdmi -mtune=arm7tdmi -mfloat-abi=softfp -mlong-calls -fno-exceptions -ffunction-sections")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GBA_ARCH_FLAGS} -Wall -Wextra -Wno-unused -pedantic -ffast-math -W")
+set(OPTIMIZATION_FLAGS "-fno-exceptions -ffunction-sections -ffast-math")
+set(MACHINE_FLAGS "-marm -mthumb-interwork -mcpu=arm7tdmi -mtune=arm7tdmi -mfloat-abi=softfp -mlong-calls")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} ${MACHINE_FLAGS} -Wall -Wextra -Wno-unused -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 

@@ -53,15 +53,7 @@ public:
 #define DMA_INT (1 << 14)
 #define DMA_ON (1 << 15)
 
-void dma_push_(uint8_t channel, Binary data, intptr_t dst);
-void dma_zero_(uint8_t channel, uint16_t size, intptr_t dst);
-
-template <typename T> void dma_push(const uint8_t channel, const Binary data, T* dst) {
-    dma_push_(channel, data, reinterpret_cast<intptr_t>(dst));
-}
-
-template <typename T> void dma_zero(const uint8_t channel, const uint16_t size, T* dst) {
-    dma_zero_(channel, size, reinterpret_cast<intptr_t>(dst));
-}
+void dma_push(uint8_t channel, Binary data, intptr_t dst);
+void dma_zero(uint8_t channel, uint16_t size, intptr_t dst);
 
 #endif //GROOVEBOY_DMA_H

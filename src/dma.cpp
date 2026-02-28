@@ -61,11 +61,11 @@ void DMA_Controller::interrupt(const uint8_t channel) {
     cycle(channel);
 }
 
-void dma_push_(const uint8_t channel, const Binary data, const intptr_t dst) {
+void dma_push(const uint8_t channel, const Binary data, const intptr_t dst) {
     DMAC.push(channel, data, dst);
 }
 
-void dma_zero_(const uint8_t channel, const uint16_t size, const intptr_t dst) {
+void dma_zero(const uint8_t channel, const uint16_t size, const intptr_t dst) {
     DMAC.zero(channel, size, dst);
 }
 
