@@ -4,31 +4,27 @@
 extern uint16_t background_palette_start[];
 extern uint16_t background_palette_size;
 
-extern uint16_t object_palette_start[];
-extern uint16_t object_palette_size;
+extern uint16_t empty_art_bg0_characters_start[];
+extern uint16_t empty_art_bg0_characters_size;
 
-extern uint16_t BG00_character_data_start[];
-extern uint16_t BG00_character_data_size;
+extern uint16_t empty_art_bg1_characters_start[];
+extern uint16_t empty_art_bg1_characters_size;
 
-extern uint16_t BG01_character_data_start[];
-extern uint16_t BG01_character_data_size;
+extern uint16_t empty_art_bg0_screen_start[];
+extern uint16_t empty_art_bg0_screen_size;
 
-extern uint16_t empty_art_BG00_screen_data_start[];
-extern uint16_t empty_art_BG00_screen_data_size;
-
-extern uint16_t empty_art_BG01_screen_data_start[];
-extern uint16_t empty_art_BG01_screen_data_size;
+extern uint16_t empty_art_bg1_screen_start[];
+extern uint16_t empty_art_bg1_screen_size;
 
 UI edit_ui() {
     const Binary background_palette { background_palette_start, background_palette_size };
-    const Binary object_palette { object_palette_start, object_palette_size };
-    const Binary bg0_character_data { BG00_character_data_start, BG00_character_data_size };
-    const Binary bg1_character_data { BG01_character_data_start, BG01_character_data_size };
-    const Binary bg0_screen_data { empty_art_BG00_screen_data_start, empty_art_BG00_screen_data_size };
-    const Binary bg1_screen_data { empty_art_BG01_screen_data_start, empty_art_BG01_screen_data_size };
+    const Binary bg0_character_data { empty_art_bg0_characters_start, empty_art_bg0_characters_size };
+    const Binary bg1_character_data { empty_art_bg1_characters_start, empty_art_bg1_characters_size };
+    const Binary bg0_screen_data { empty_art_bg0_screen_start, empty_art_bg0_screen_size };
+    const Binary bg1_screen_data { empty_art_bg1_screen_start, empty_art_bg1_screen_size };
     return UI {
         background_palette,
-        object_palette,
+        background_palette, // TODO: object palette.
         bg0_character_data,
         bg1_character_data,
         bg0_screen_data,

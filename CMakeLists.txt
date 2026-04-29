@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_PROJECT_NAME grooveboy)
 
 # Set the toolchain before project() call
 set(CMAKE_SYSTEM_NAME Generic)
@@ -14,12 +15,17 @@ if (NOT DEFINED ENV{DEVKITARM})
     message(FATAL_ERROR "DEVKITARM environment variable is not set. Please set it to your devkitARM installation directory.")
 endif ()
 
+if (NOT DEFINED ENV{GBATM})
+    message(FATAL_ERROR "GBATM environment variable is not set. Please set it to your GBATM executable. (https://github.com/VictorVanWeyenberg/gba_tile_manager)")
+endif ()
+
 # Set compilers
 set(CMAKE_CXX_COMPILER "$ENV{DEVKITARM}/bin/arm-none-eabi-g++")
 set(CMAKE_OBJCOPY "$ENV{DEVKITARM}/bin/arm-none-eabi-objcopy")
 set(CMAKE_AS "$ENV{DEVKITARM}/bin/arm-none-eabi-as")
 set(GBAFIX "$ENV{DEVKITPRO}/tools/bin/gbafix")
 set(RAW2C "$ENV{DEVKITPRO}/tools/bin/raw2c")
+set(GBATM "$ENV{GBATM}")
 
 # Skip compiler checks (cross-compilation)
 set(CMAKE_CXX_COMPILER_WORKS 1)
@@ -44,27 +50,34 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -specs=gba.specs ${GBA_ARC
 # Directories
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
-set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin")
+set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 set(BUILD_DIR "${CMAKE_BINARY_DIR}")
+set(BIN_DIR "${BUILD_DIR}/bin")
+set(OBJECTS_DIR "${BUILD_DIR}/bin_objects")
+
+file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
+
+# Create executable
+add_executable(grooveboy)
+
+# Convert resources to binary
+add_custom_command(
+        TARGET grooveboy
+        PRE_BUILD
+        COMMAND ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
+        VERBATIM
+)
 
 # Collect source files
 file(GLOB_RECURSE SOURCES "${SRC_DIR}/*.cpp")
 file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.h")
-
-# Collect binary files
-if (EXISTS "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/")
-    file(GLOB ORIG_BIN_FILES "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/bin/*.bin")
-    file(COPY ${ORIG_BIN_FILES} DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
-    file(COPY "${CMAKE_SOURCE_DIR}/grooveboy_cpp_tiles/structure.json" DESTINATION "${CMAKE_SOURCE_DIR}/bin/")
-endif ()
-
-file(GLOB BIN_FILES "${BIN_DIR}/*.bin")
+file(GLOB_RECURSE BINARIES "${BIN_DIR}/*.bin")
 
 # Function to convert binary files to object files with clean symbol names
 function(add_binary_data target binary_file)
     get_filename_component(bin_filename ${binary_file} NAME_WE)
-    set(output_obj "${BUILD_DIR}/bin_objects/${bin_filename}.o")
-    set(wrapper_asm "${BUILD_DIR}/bin_objects/${bin_filename}_wrapper.s")
+    set(output_obj "${OBJECTS_DIR}/${bin_filename}.o")
+    set(wrapper_asm "${OBJECTS_DIR}/${bin_filename}_wrapper.s")
 
     # Create assembly wrapper that includes the binary and defines clean symbols
     file(WRITE ${wrapper_asm}
@@ -83,7 +96,7 @@ function(add_binary_data target binary_file)
 
     add_custom_command(
             OUTPUT ${output_obj}
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${BUILD_DIR}/bin_objects"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${OBJECTS_DIR}"
             COMMAND ${CMAKE_AS} -o ${output_obj} ${wrapper_asm}
             DEPENDS ${binary_file}
             COMMENT "Converting ${bin_filename}.bin to object file"
@@ -93,16 +106,19 @@ function(add_binary_data target binary_file)
     target_sources(${target} PRIVATE ${output_obj})
 endfunction()
 
-# Create executable
-add_executable(grooveboy ${SOURCES} ${HEADERS})
-
 # Include directories
 target_include_directories(grooveboy PRIVATE ${INCLUDE_DIR})
 
 # Add binary data files as embedded resources
-foreach (bin_file ${BIN_FILES})
+foreach (bin_file ${BINARIES})
     add_binary_data(grooveboy ${bin_file})
 endforeach ()
+
+target_sources(
+        grooveboy
+        PRIVATE ${SOURCES}
+        PRIVATE ${HEADERS}
+)
 
 # Convert ELF to GBA ROM
 add_custom_command(
