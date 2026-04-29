@@ -22,5 +22,6 @@
 
 void write_character_data(uint8_t bg, Binary data);
 void write_screen_data(uint8_t bg, Binary data);
+void write_object_character_data(Binary data);
 
 #endif //GROOVEBOY_VRAM_H

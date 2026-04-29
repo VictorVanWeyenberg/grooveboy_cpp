@@ -46,7 +46,7 @@ public:
 
 #define DMA ((volatile DMA_Channel *)0x040000B0)
 
-#define DMA_SRC_INC (2 << 7);
+#define DMA_SRC_INC (0 << 7);
 #define DMA_REPEAT  (1 << 9)
 #define TRANSFER_32 (1 << 10)
 #define SPECIAL_START (3 << 12)

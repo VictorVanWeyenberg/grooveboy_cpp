@@ -55,25 +55,35 @@ set(BUILD_DIR "${CMAKE_BINARY_DIR}")
 set(BIN_DIR "${BUILD_DIR}/bin")
 set(OBJECTS_DIR "${BUILD_DIR}/bin_objects")
 
-file(GLOB_RECURSE RESOURCES "${RESOURCE_DIR}/*")
-
 # Create executable
 add_executable(grooveboy)
-
-# Convert resources to binary
-add_custom_command(
-        TARGET grooveboy
-        PRE_BUILD
-        COMMAND ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
-        VERBATIM
-)
 
 # Collect source files
 file(GLOB_RECURSE SOURCES "${SRC_DIR}/*.cpp")
 file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.h")
-file(GLOB_RECURSE BINARIES "${BIN_DIR}/*.bin")
 
-# Function to convert binary files to object files with clean symbol names
+# Glob resources at configure time
+file(GLOB_RECURSE RESOURCES CONFIGURE_DEPENDS "${RESOURCES_DIR}/*")
+
+# Run GBATM at configure time
+execute_process(
+        COMMAND ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
+        RESULT_VARIABLE GBATM_RESULT
+        OUTPUT_VARIABLE GBATM_OUTPUT
+        ERROR_VARIABLE GBATM_ERROR
+)
+
+if (NOT GBATM_RESULT EQUAL 0)
+    message(FATAL_ERROR "GBATM failed:\n${GBATM_ERROR}")
+endif ()
+
+# NOW glob the .bin files — they exist because GBATM just ran
+file(GLOB BINARIES "${BIN_DIR}/*.bin")
+
+if (NOT BINARIES)
+    message(FATAL_ERROR "GBATM produced no .bin files in ${BIN_DIR}")
+endif ()
+
 function(add_binary_data target binary_file)
     get_filename_component(bin_filename ${binary_file} NAME_WE)
     set(output_obj "${OBJECTS_DIR}/${bin_filename}.o")
@@ -98,7 +108,7 @@ function(add_binary_data target binary_file)
             OUTPUT ${output_obj}
             COMMAND ${CMAKE_COMMAND} -E make_directory "${OBJECTS_DIR}"
             COMMAND ${CMAKE_AS} -o ${output_obj} ${wrapper_asm}
-            DEPENDS ${binary_file}
+            DEPENDS ${binary_file} gbatm_outputs   # waits for GBATM to have run
             COMMENT "Converting ${bin_filename}.bin to object file"
             VERBATIM
     )
@@ -113,6 +123,9 @@ target_include_directories(grooveboy PRIVATE ${INCLUDE_DIR})
 foreach (bin_file ${BINARIES})
     add_binary_data(grooveboy ${bin_file})
 endforeach ()
+
+# Aggregator target so other things can depend on the .bin step cleanly
+add_custom_target(gbatm_outputs DEPENDS ${BINARIES})
 
 target_sources(
         grooveboy

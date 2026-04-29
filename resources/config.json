@@ -1,5 +1,4 @@
 {
-  "name": "grooveboy",
   "screens": [
     {
       "palette": "background_palette.png",
@@ -10,6 +9,12 @@
       "palette": "background_palette.png",
       "character": "empty_art/bg1/characters.png",
       "screen": "empty_art/bg1/screen.png"
+    }
+  ],
+  "objects": [
+    {
+      "palette": "object_palette.png",
+      "character": "object_characters.png"
     }
   ],
   "boops": [

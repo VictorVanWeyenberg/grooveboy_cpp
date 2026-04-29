@@ -24,3 +24,7 @@ void write_screen_data(const uint8_t bg, const Binary data) {
         default: break;
     }
 }
+
+void write_object_character_data(const Binary data) {
+    dma_push(0, data, OBJ_CHARACTER_BLOCK);
+}
