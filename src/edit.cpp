@@ -44,8 +44,6 @@ UI edit_ui() {
     const Binary screen_data[2] = { bg0_screen_data, bg1_screen_data };
 
     const auto boops = Boops(reinterpret_cast<Boop*>(empty_art_boops_start), empty_art_boops_args_start);
-    auto cursor = Cursor();
-    cursor.point_to(boops.get_current_boop());
 
     return UI(
         background_palette,
@@ -53,7 +51,6 @@ UI edit_ui() {
         screen_data,
         object_palette,
         object_characters,
-        boops,
-        cursor
+        boops
     );
 }

@@ -2,12 +2,12 @@
 #define GROOVEBOY_IO_H
 
 #define MEM_IO 0x04000000
+#define REG_DISPLAY   (*((volatile uint16_t *)(MEM_IO)))
+#define DISPSTAT (*((volatile uint16_t *)(MEM_IO + 0x4)))
 #define BG0CNT (*((volatile uint16_t *)(MEM_IO + 0x8)))
 #define BG1CNT (*((volatile uint16_t *)(MEM_IO + 0xA)))
 #define BG2CNT (*((volatile uint16_t *)(MEM_IO + 0xC)))
 #define BG3CNT (*((volatile uint16_t *)(MEM_IO + 0xE)))
-
-#define REG_DISPLAY   (*((volatile uint16_t *)(MEM_IO)))
 
 #define BG_MODE_0 0
 #define BG_MODE_1 1
