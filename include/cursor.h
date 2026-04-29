@@ -1,16 +1,16 @@
 #ifndef GROOVEBOY_CURSOR_H
 #define GROOVEBOY_CURSOR_H
 #include "oam.h"
+#include "boop.h"
 
 class Cursor {
 public:
     Cursor();
+    void point_to(const Boop &boop);
+    void render();
 
 private:
-    Object nw; // North West
-    Object ne; // North East
-    Object sw; // South West
-    Object se; // South East
+    Object objs[4];
 };
 
 #endif //GROOVEBOY_CURSOR_H

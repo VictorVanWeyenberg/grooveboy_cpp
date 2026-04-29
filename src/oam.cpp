@@ -11,7 +11,7 @@ OBJ Object::to_oam() const {
         // Attribute 0
         .y = static_cast<uint8_t>(this->y),
         .rotation_scaling_flag = 0,
-        .enable = 1,
+        .enable = 0,
         .obj_mode = 0,
         .obj_mosaic = 0,
         .palette_mode = 0,
@@ -32,6 +32,11 @@ OBJ Object::to_oam() const {
         // Rotation/Scaling Parameters
         .rotation_scaling_parameters = 0
     };
+}
+
+void Object::set_location(const uint8_t x, const uint8_t y) {
+    this->x = x;
+    this->y = y;
 }
 
 bool OAM_Controller::cache(const Object *buffer_, const uint8_t buffer_length_) volatile {

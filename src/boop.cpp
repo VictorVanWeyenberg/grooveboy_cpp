@@ -1,5 +1,37 @@
 #include "boop.h"
 
+Boops::Boops(Boop* boops, uint8_t* args) : boops(boops), args(args) {
+}
+
+Boop &Boops::get_current_boop() const {
+    return this->boops[this->index];
+}
+
+void Boops::move(const Direction direction) {
+    switch (direction) {
+        case N:
+            if (const auto north = this->get_current_boop().get_north()) {
+                this->index = *north;
+            }
+            break;
+        case E:
+            if (const auto east = this->get_current_boop().get_east()) {
+                this->index = *east;
+            }
+            break;
+        case S:
+            if (const auto south = this->get_current_boop().get_south()) {
+                this->index = *south;
+            }
+            break;
+        case W:
+            if (const auto west = this->get_current_boop().get_west()) {
+                this->index = *west;
+            }
+            break;
+    }
+}
+
 uint8_t Boop::get_x() const {
     return this->data.x;
 }
@@ -20,35 +52,35 @@ std::optional<uint8_t> Boop::get_north() {
     if (this->data.north == 255) {
         return std::nullopt;
     }
-    return std::optional(this->data.north);
+    return this->data.north;
 }
 
 std::optional<uint8_t> Boop::get_east() {
     if (this->data.east == 255) {
         return std::nullopt;
     }
-    return std::optional(this->data.east);
+    return this->data.east;
 }
 
 std::optional<uint8_t> Boop::get_south() {
     if (this->data.south == 255) {
         return std::nullopt;
     }
-    return std::optional(this->data.south);
+    return this->data.south;
 }
 
 std::optional<uint8_t> Boop::get_west() {
     if (this->data.west == 255) {
         return std::nullopt;
     }
-    return std::optional(this->data.west);
+    return this->data.west;
 }
 
 std::optional<uint8_t> Boop::get_callback() {
     if (this->data.callback == 255) {
         return std::nullopt;
     }
-    return std::optional(this->data.callback);
+    return this->data.callback;
 }
 
 uint8_t Boop::get_args_index() const {

@@ -2,44 +2,30 @@
 #define GROOVEBOY_UI_H
 
 #include "bin.h"
+#include "boop.h"
+#include "cursor.h"
 
 class UI {
 public:
     UI(
-        const Binary background_palette,
-        const Binary bg0_character_data,
-        const Binary bg1_character_data,
-        const Binary bg0_screen_data,
-        const Binary bg1_screen_data,
-        const Binary object_palette,
-        const Binary object_character_data
-    ) : background_palette(background_palette),
-    character_data { bg0_character_data, bg1_character_data },
-    screen_data { bg0_screen_data, bg1_screen_data },
-    object_palette(object_palette),
-    object_character_data(object_character_data) {}
+        Binary background_palette,
+        const Binary character_data[2],
+        const Binary screen_data[2],
+        Binary object_palette,
+        Binary object_character_data,
+        Boops boops,
+        Cursor cursor
+    );
 
-    void render() const;
+    void render();
 private:
     Binary background_palette;
     Binary character_data[2];
     Binary screen_data[2];
     Binary object_palette;
     Binary object_character_data;
-};
-
-struct Boop {
-    uint8_t sx;
-    uint8_t sy;
-    uint8_t ex;
-    uint8_t ey;
-    uint8_t north;
-    uint8_t east;
-    uint8_t south;
-    uint8_t west;
-    uint8_t callback_index;
-    uint8_t args_index;
-    uint8_t args_len;
+    Boops boops;
+    Cursor cursor;
 };
 
 UI edit_ui();

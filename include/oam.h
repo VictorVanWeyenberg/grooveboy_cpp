@@ -33,7 +33,7 @@ typedef struct OBJ {
 
 class Object {
     uint32_t x: 8;
-    uint32_t y: 9;
+    uint32_t y: 8;
     uint32_t character_data: 10;
     uint32_t palette_number: 4;
     bool enable = true;
@@ -43,7 +43,7 @@ class Object {
 public:
     Object(
         const uint8_t x,
-        const uint16_t y,
+        const uint8_t y,
         const uint16_t character_data,
         const uint8_t palette_number,
         const bool horizontal_flip,
@@ -57,6 +57,7 @@ public:
     }
 
     [[nodiscard]] OBJ to_oam() const;
+    void set_location(uint8_t x, uint8_t y);
 };
 
 class OAM_Controller {
@@ -69,6 +70,6 @@ public:
     [[nodiscard]] uint8_t get_buffer_length() const volatile;
 };
 
-void write_oam(Object* objects, uint8_t objects_length);
+void write_oam(const Object *objects, uint8_t objects_length);
 
 #endif //GROOVEBOY_OAM_H
