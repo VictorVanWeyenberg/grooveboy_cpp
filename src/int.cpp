@@ -11,16 +11,16 @@ void init_interrupts() {
 }
 
 void interrupt_handler() {
-    if (REG_IF & INT_DMA0) {
-        REG_IF |= INT_DMA0;
+    const uint16_t flags = REG_IF & REG_IE;
+    REG_IF = flags; // Acknowledgement.
+
+    if (flags & INT_DMA0) {
         dma_interrupt(0);
     }
-    if (REG_IF & INT_TIMER2) {
-        REG_IF |= INT_TIMER2;
+    if (flags & INT_TIMER2) {
         tmr_interrupt(2);
     }
-    if (REG_IF & INT_VBLANK) {
-        REG_IF |= INT_VBLANK;
+    if (flags & INT_VBLANK) {
         vblank_interrupt();
     }
 }
