@@ -16,6 +16,8 @@
 #define BG_MODE_4 4
 #define BG_MODE_5 5
 
+#define H_BLANK_INTERVAL_FREE 1 << 5
+
 #define SCREEN_DISPLAY_BG0 1 << 8
 #define SCREEN_DISPLAY_BG1 1 << 9
 #define SCREEN_DISPLAY_BG2 1 << 10

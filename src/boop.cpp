@@ -7,29 +7,34 @@ Boop &Boops::get_current_boop() const {
     return this->boops[this->index];
 }
 
-void Boops::move(const Direction direction) {
+bool Boops::move(const Direction direction) {
     switch (direction) {
         case N:
             if (const auto north = this->get_current_boop().get_north()) {
                 this->index = *north;
+                return true;
             }
             break;
         case E:
             if (const auto east = this->get_current_boop().get_east()) {
                 this->index = *east;
+                return true;
             }
             break;
         case S:
             if (const auto south = this->get_current_boop().get_south()) {
                 this->index = *south;
+                return true;
             }
             break;
         case W:
             if (const auto west = this->get_current_boop().get_west()) {
                 this->index = *west;
+                return true;
             }
             break;
     }
+    return false;
 }
 
 uint8_t Boop::get_x() const {

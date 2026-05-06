@@ -7,7 +7,7 @@ class Cursor {
 public:
     Cursor();
     void point_to(const Boop &boop);
-    void render();
+    void render() const;
 
 private:
     Object objs[4];

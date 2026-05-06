@@ -3,9 +3,9 @@
 
 #include <cstdlib>
 
-static DMA_Controller DMAC;
+DMA_Controller DMAC;
 
-void DMA_Controller::push(const uint8_t channel, const Binary data, intptr_t dst) {
+void DMA_Controller::push(const uint8_t channel, const Binary data, const intptr_t dst) {
     if (unused.empty()) {
         return;
     }
@@ -26,7 +26,7 @@ void DMA_Controller::zero(const uint8_t channel, const uint16_t size, const intp
     }
     DMA_Entry *entry = unused.front();
     unused.pop_front();
-    entry->data = Binary(nullptr, size);
+    entry->data = Binary(0, size);
     entry->dst = dst;
     entry->inc_src = false;
     this->queues[channel].push_back(entry);
@@ -43,11 +43,12 @@ void DMA_Controller::cycle(const uint8_t channel) {
     this->queues[channel].pop_front();
     this->busies[channel] = entry;
     DMA[channel].cnt_h = 0;
-    DMA[channel].src = reinterpret_cast<intptr_t>(entry->data.start);
+    DMA[channel].src = entry->data.get_start();
     DMA[channel].dst = entry->dst;
-    DMA[channel].cnt_l = entry->data.size >> 1; // TRANSFER_16
-    if (entry->inc_src) {
-        DMA[channel].cnt_h |= DMA_SRC_INC;
+    DMA[channel].cnt_l = entry->data.get_size() >> 1; // TRANSFER_16
+    DMA[channel].cnt_h &= ~(3 << 7);
+    if (!entry->inc_src) {
+        DMA[channel].cnt_h |= DMA_SRC_FIX;
     }
     DMA[channel].cnt_h |= DMA_INT | DMA_ON;
 }

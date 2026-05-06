@@ -51,8 +51,9 @@ enum Direction {
 class Boops {
 public:
     Boops(Boop* boops, uint8_t* args);
+    explicit Boops(Boop& boops) = delete;
     [[nodiscard]] Boop& get_current_boop() const;
-    void move(Direction direction);
+    bool move(Direction direction);
 
 private:
     Boop* boops;

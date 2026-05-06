@@ -1,5 +1,6 @@
 #include "tmr.h"
 
+#include "key.h"
 #include "ui.h"
 
 void write_tmr(const uint8_t channel, const uint16_t reload) {
@@ -11,6 +12,8 @@ void write_tmr(const uint8_t channel, const uint16_t reload) {
     TMR[channel].start = true;
 }
 
-void tmr_interrupt(uint8_t channel) {
-    move_cursor(S);
+void tmr_interrupt(const uint8_t channel) {
+    if (channel == 2) {
+        register_key_presses();
+    }
 }

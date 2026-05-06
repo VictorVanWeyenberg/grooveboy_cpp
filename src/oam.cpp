@@ -7,7 +7,7 @@
 volatile OAM_Controller OAMC;
 
 OBJ Object::to_oam() const {
-    return OBJ {
+    return OBJ{
         // Attribute 0
         .y = static_cast<uint8_t>(this->y),
         .rotation_scaling_flag = 0,
@@ -62,7 +62,7 @@ bool OAM_Controller::cache(const Object *buffer_, const uint8_t buffer_length_) 
     return shrunk;
 }
 
-OBJ * OAM_Controller::get_buffer() const volatile {
+OBJ *OAM_Controller::get_buffer() const volatile {
     return this->buffer;
 }
 
@@ -77,7 +77,7 @@ void write_oam(const Object *objects, const uint8_t objects_length) {
 
     const bool shrunk = OAMC.cache(objects, objects_length);
 
-    dma_push(0, Binary(OAMC.get_buffer(), OAMC.get_buffer_length() * sizeof(OBJ)), MEM_OAM);
+    dma_push(0, Binary(reinterpret_cast<intptr_t>(OAMC.get_buffer()), OAMC.get_buffer_length() * sizeof(OBJ)), MEM_OAM);
 
     if (shrunk) {
         dma_zero(0, (128 - objects_length) * sizeof(OBJ), MEM_OAM + sizeof(OBJ) * objects_length);

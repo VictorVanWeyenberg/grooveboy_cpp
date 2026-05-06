@@ -4,7 +4,7 @@ set(CMAKE_PROJECT_NAME grooveboy)
 # Set the toolchain before project() call
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # DevkitPro environment variables
 if (NOT DEFINED ENV{DEVKITPRO})

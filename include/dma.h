@@ -6,16 +6,18 @@
 
 #include "bin.h"
 
+#define POOL_SIZE 8
+
 class DMA_Entry {
 public:
-    Binary data;
+    Binary data = Binary(0, 0);
     intptr_t dst = 0;
     bool inc_src = false;
 };
 
 static std::deque<DMA_Entry *> make_pool() {
     std::deque<DMA_Entry *> pool;
-    for (size_t index = 0; index < 8; ++index) {
+    for (size_t index = 0; index < POOL_SIZE; ++index) {
         pool.push_back(new DMA_Entry());
     }
     return pool;
@@ -25,9 +27,7 @@ class DMA_Controller {
 public:
     void push(uint8_t channel, Binary data, intptr_t dst);
     void zero(uint8_t channel, uint16_t size, intptr_t dst);
-
     void cycle(uint8_t channel);
-
     void interrupt(uint8_t channel);
 
 private:
@@ -46,7 +46,8 @@ public:
 
 #define DMA ((volatile DMA_Channel *)0x040000B0)
 
-#define DMA_SRC_INC (0 << 7);
+#define DMA_SRC_INC (0 << 7)
+#define DMA_SRC_FIX (2 << 7)
 #define DMA_REPEAT  (1 << 9)
 #define TRANSFER_32 (1 << 10)
 #define SPECIAL_START (3 << 12)

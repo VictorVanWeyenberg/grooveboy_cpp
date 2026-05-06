@@ -4,8 +4,12 @@
 
 class Binary {
 public:
-    void *start = nullptr;
-    uint16_t size = 0;
+    Binary(intptr_t start, uint16_t size);
+    [[nodiscard]] intptr_t get_start() const;
+    [[nodiscard]] uint16_t get_size() const;
+private:
+    intptr_t start;
+    uint16_t size;
 };
 
 #endif //GROOVEBOY_BIN_H

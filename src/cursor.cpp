@@ -19,6 +19,6 @@ void Cursor::point_to(const Boop &boop) {
     this->objs[3].set_location(x + w + 1, y + h + 1);
 }
 
-void Cursor::render() {
+void Cursor::render() const {
     write_oam(this->objs, 4);
 }
