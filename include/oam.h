@@ -5,7 +5,7 @@
 
 #define MEM_OAM 0x07000000
 
-typedef struct OBJ {
+class Object {
     // Attribute 0
     uint8_t y: 8;
     uint8_t rotation_scaling_flag: 1;
@@ -29,45 +29,35 @@ typedef struct OBJ {
 
     // Rotation/Scaling Parameters
     uint16_t rotation_scaling_parameters: 16;
-} OBJ;
-
-class Object {
-    uint32_t x: 8;
-    uint32_t y: 8;
-    uint32_t character_data: 10;
-    uint32_t palette_number: 4;
-    bool enable = true;
-    bool horizontal_flip;
-    bool vertical_flip;
 
 public:
     Object(
         const uint8_t x,
         const uint8_t y,
-        const uint16_t character_data,
+        const uint16_t character,
         const uint8_t palette_number,
         const bool horizontal_flip,
         const bool vertical_flip
-    ) : x(x),
-        y(y),
-        character_data(character_data),
-        palette_number(palette_number),
-        horizontal_flip(horizontal_flip),
-        vertical_flip(vertical_flip) {
+    ) {
+        this->y = y;
+        this->rotation_scaling_flag = 0;
+        this->enable = 0;
+        this->obj_mode = 0;
+        this->obj_mosaic = 0;
+        this->palette_mode = 0;
+        this->shape = 0;
+        this->x = x;
+        this->not_used = 0;
+        this->horizontal_flip = horizontal_flip;
+        this->vertical_flip = vertical_flip;
+        this->size = 0;
+        this->character = character;
+        this->priority = 0;
+        this->palette_number = palette_number;
+        this->rotation_scaling_parameters = 0;
     }
 
-    [[nodiscard]] OBJ to_oam() const;
     void set_location(uint8_t x, uint8_t y);
-};
-
-class OAM_Controller {
-    OBJ* buffer = nullptr;
-    uint8_t buffer_length = 0;
-
-public:
-    bool cache(const Object* buffer_, uint8_t buffer_length_) volatile;
-    [[nodiscard]] OBJ* get_buffer() const volatile;
-    [[nodiscard]] uint8_t get_buffer_length() const volatile;
 };
 
 void write_oam(const Object *objects, uint8_t objects_length);
