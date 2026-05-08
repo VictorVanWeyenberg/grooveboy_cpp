@@ -42,17 +42,13 @@ void register_key_presses() {
 
 bool key_pressed(const Keypad key) {
     const uint8_t key_history = get_history(key);
-    return key_history != 0 && (key_history & 0x81) == 0;
+    const auto pressed = key_history != 0 && (key_history & 0x81) == 0;
+    if (pressed) {
+        clear_history(key);
+    }
+    return pressed;
 }
 
 bool key_held(const Keypad key) {
     return get_history(key) == 0xff;
-}
-
-void end_loop() {
-    for (const Keypad key : tracked_keys) {
-        if (key_pressed(key)) {
-            clear_history(key);
-        }
-    }
 }

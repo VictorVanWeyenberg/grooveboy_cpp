@@ -20,7 +20,6 @@ void handle_keypad() {
     if (key_pressed(Right) || key_held(Right)) {
         move_cursor(E);
     }
-    end_loop();
 }
 
 [[noreturn]]
@@ -28,7 +27,7 @@ int main() {
     init_bg();
     init_keys();
     init_interrupts();
-    write_tmr(2, 65536.0 * 0.95); // 50 ms
+    write_tmr(2, 65536.0 * .980); // 20 ms
     init_ui();
 
     for (;;) {

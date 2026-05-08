@@ -34,6 +34,5 @@ void init_keys();
 void register_key_presses();
 bool key_pressed(Keypad key);
 bool key_held(Keypad key);
-void end_loop();
 
 #endif //GROOVEBOY_KEY_H
