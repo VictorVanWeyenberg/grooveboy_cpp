@@ -1,152 +1,173 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_PROJECT_NAME grooveboy)
 
-# Set the toolchain before project() call
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-# DevkitPro environment variables
-if (NOT DEFINED ENV{DEVKITPRO})
-    message(FATAL_ERROR "DEVKITPRO environment variable is not set. Please set it to your devkitPro installation directory.")
-endif ()
+# ---------------------------------------------------------------------------
+# DevkitPro environment
+# ---------------------------------------------------------------------------
+foreach(var DEVKITPRO DEVKITARM GBATM)
+    if(NOT DEFINED ENV{${var}})
+        message(FATAL_ERROR "${var} environment variable is not set.")
+    endif()
+endforeach()
 
-if (NOT DEFINED ENV{DEVKITARM})
-    message(FATAL_ERROR "DEVKITARM environment variable is not set. Please set it to your devkitARM installation directory.")
-endif ()
+set(DEVKITARM "$ENV{DEVKITARM}")
+set(DEVKITPRO "$ENV{DEVKITPRO}")
 
-if (NOT DEFINED ENV{GBATM})
-    message(FATAL_ERROR "GBATM environment variable is not set. Please set it to your GBATM executable. (https://github.com/VictorVanWeyenberg/gba_tile_manager)")
-endif ()
-
-# Set compilers
-set(CMAKE_CXX_COMPILER "$ENV{DEVKITARM}/bin/arm-none-eabi-g++")
-set(CMAKE_OBJCOPY "$ENV{DEVKITARM}/bin/arm-none-eabi-objcopy")
-set(CMAKE_AS "$ENV{DEVKITARM}/bin/arm-none-eabi-as")
-set(GBAFIX "$ENV{DEVKITPRO}/tools/bin/gbafix")
-set(RAW2C "$ENV{DEVKITPRO}/tools/bin/raw2c")
-set(GBATM "$ENV{GBATM}")
+set(CMAKE_CXX_COMPILER "${DEVKITARM}/bin/arm-none-eabi-g++")
+set(CMAKE_ASM_COMPILER "${DEVKITARM}/bin/arm-none-eabi-gcc")
+set(CMAKE_OBJCOPY      "${DEVKITARM}/bin/arm-none-eabi-objcopy")
+set(GBAFIX             "${DEVKITPRO}/tools/bin/gbafix")
+set(GBATM              "$ENV{GBATM}")
 
 # Skip compiler checks (cross-compilation)
 set(CMAKE_CXX_COMPILER_WORKS 1)
+set(CMAKE_ASM_COMPILER_WORKS 1)
 
-project(grooveboy CXX)
+project(grooveboy CXX ASM)
 
-# C++ standard
+# ---------------------------------------------------------------------------
+# Language standard & flags
+# ---------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# GBA-specific compiler flags
 set(OPTIMIZATION_FLAGS "-fno-exceptions -ffunction-sections -ffast-math")
-set(MACHINE_FLAGS "-marm -mthumb-interwork -mcpu=arm7tdmi -mtune=arm7tdmi -mfloat-abi=softfp -mlong-calls")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} ${MACHINE_FLAGS} -Wall -Wextra -Wno-unused -pedantic")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(MACHINE_FLAGS      "-marm -mthumb-interwork -mcpu=arm7tdmi -mtune=arm7tdmi -mfloat-abi=softfp -mlong-calls")
+
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} ${MACHINE_FLAGS} -Wall -Wextra -Wno-unused -pedantic")
+set(CMAKE_CXX_FLAGS_DEBUG   "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_ASM_FLAGS         "")
+set(CMAKE_ASM_FLAGS_DEBUG   "")
+set(CMAKE_ASM_FLAGS_RELEASE "")
 
-# GBA-specific linker flags
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -specs=gba.specs ${GBA_ARCH_FLAGS} -lm")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -specs=gba.specs -lm")
 
+# ---------------------------------------------------------------------------
 # Directories
-set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
-set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
+# ---------------------------------------------------------------------------
+set(SRC_DIR       "${CMAKE_SOURCE_DIR}/src")
+set(INCLUDE_DIR   "${CMAKE_SOURCE_DIR}/include")
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
-set(BUILD_DIR "${CMAKE_BINARY_DIR}")
-set(BIN_DIR "${BUILD_DIR}/bin")
-set(OBJECTS_DIR "${BUILD_DIR}/bin_objects")
+set(BIN_DIR       "${CMAKE_BINARY_DIR}/bin")
+set(ASM_DIR  "${CMAKE_BINARY_DIR}/asm")
 
-# Create executable
-add_executable(grooveboy)
-
-# Collect source files
-file(GLOB_RECURSE SOURCES "${SRC_DIR}/*.cpp")
-file(GLOB_RECURSE HEADERS "${INCLUDE_DIR}/*.h")
-
-# Glob resources at configure time
+# ---------------------------------------------------------------------------
+# Sources
+# ---------------------------------------------------------------------------
+file(GLOB_RECURSE SOURCES   CONFIGURE_DEPENDS "${SRC_DIR}/*.cpp")
+file(GLOB_RECURSE HEADERS   CONFIGURE_DEPENDS "${INCLUDE_DIR}/*.h")
 file(GLOB_RECURSE RESOURCES CONFIGURE_DEPENDS "${RESOURCES_DIR}/*")
 
-# Run GBATM at configure time
+# ---------------------------------------------------------------------------
+# GBATM — run at configure time to discover output .bin names,
+#         re-runs at build time when any resource changes.
+# ---------------------------------------------------------------------------
 execute_process(
-        COMMAND ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
-        RESULT_VARIABLE GBATM_RESULT
-        OUTPUT_VARIABLE GBATM_OUTPUT
-        ERROR_VARIABLE GBATM_ERROR
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${BIN_DIR}"
 )
 
-if (NOT GBATM_RESULT EQUAL 0)
+execute_process(
+        COMMAND         ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
+        OUTPUT_VARIABLE GBATM_OUTPUT
+        ERROR_VARIABLE  GBATM_ERROR
+        RESULT_VARIABLE GBATM_RESULT
+)
+message(STATUS "GBATM raw output: '${GBATM_OUTPUT}'")
+
+if(NOT GBATM_RESULT EQUAL 0)
     message(FATAL_ERROR "GBATM failed:\n${GBATM_ERROR}")
-endif ()
+endif()
 
-# NOW glob the .bin files — they exist because GBATM just ran
-file(GLOB BINARIES "${BIN_DIR}/*.bin")
+string(STRIP "${GBATM_OUTPUT}" GBATM_OUTPUT)
+string(REPLACE "\n" ";" EXPECTED_BINS "${GBATM_OUTPUT}")
 
-if (NOT BINARIES)
-    message(FATAL_ERROR "GBATM produced no .bin files in ${BIN_DIR}")
-endif ()
+set(GBATM_STAMP "${CMAKE_BINARY_DIR}/gbatm.stamp")
 
-function(add_binary_data target binary_file)
-    get_filename_component(bin_filename ${binary_file} NAME_WE)
-    set(output_obj "${OBJECTS_DIR}/${bin_filename}.o")
-    set(wrapper_asm "${OBJECTS_DIR}/${bin_filename}_wrapper.s")
+add_custom_command(
+        OUTPUT  ${GBATM_STAMP} ${EXPECTED_BINS}
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${BIN_DIR}"
+        COMMAND ${GBATM} -i ${RESOURCES_DIR} -o ${BIN_DIR} -f
+        COMMAND ${CMAKE_COMMAND} -E touch ${GBATM_STAMP}
+        DEPENDS ${RESOURCES}
+        COMMENT "Running GBATM on resources"
+        VERBATIM
+)
 
-    # Create assembly wrapper that includes the binary and defines clean symbols
-    file(WRITE ${wrapper_asm}
-            "    .section .data\n"
-            "    .align 2\n"
-            "    .global ${bin_filename}_start\n"
-            "    .global ${bin_filename}_end\n"
-            "    .global ${bin_filename}_size\n"
-            "${bin_filename}_start:\n"
-            "    .incbin \"${binary_file}\"\n"
-            "    .align 2\n"
-            "${bin_filename}_end:\n"
-            "${bin_filename}_size:\n"
-            "    .int ${bin_filename}_end - ${bin_filename}_start\n"
-    )
+# ---------------------------------------------------------------------------
+# Assembly wrapper generation — one .S per .bin
+# ---------------------------------------------------------------------------
+set(WRAP_SCRIPT "${CMAKE_BINARY_DIR}/generate_wrapper.cmake")
+
+file(WRITE ${WRAP_SCRIPT} [[
+cmake_path(GET BIN_FILE STEM bin_name)
+file(WRITE "${WRAPPER_FILE}"
+"    .section .data\n\
+    .align 2\n\
+    .global ${bin_name}_start\n\
+    .global ${bin_name}_end\n\
+    .global ${bin_name}_size\n\
+${bin_name}_start:\n\
+    .incbin \"${BIN_FILE}\"\n\
+    .align 2\n\
+${bin_name}_end:\n\
+${bin_name}_size:\n\
+    .int ${bin_name}_end - ${bin_name}_start\n"
+)
+]])
+
+set(WRAPPER_SOURCES)
+
+foreach(bin_file ${EXPECTED_BINS})
+    cmake_path(GET bin_file STEM bin_stem)
+    set(wrapper "${ASM_DIR}/${bin_stem}_wrapper.S")
+    list(APPEND WRAPPER_SOURCES ${wrapper})
 
     add_custom_command(
-            OUTPUT ${output_obj}
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${OBJECTS_DIR}"
-            COMMAND ${CMAKE_AS} -o ${output_obj} ${wrapper_asm}
-            DEPENDS ${binary_file} gbatm_outputs   # waits for GBATM to have run
-            COMMENT "Converting ${bin_filename}.bin to object file"
+            OUTPUT  ${wrapper}
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${ASM_DIR}"
+            COMMAND ${CMAKE_COMMAND}
+            -D BIN_FILE=${bin_file}
+            -D WRAPPER_FILE=${wrapper}
+            -P ${WRAP_SCRIPT}
+            DEPENDS ${bin_file} ${GBATM_STAMP}
+            COMMENT "Generating wrapper for ${bin_stem}.bin"
             VERBATIM
     )
+endforeach()
 
-    target_sources(${target} PRIVATE ${output_obj})
-endfunction()
+# ---------------------------------------------------------------------------
+# Main target
+# ---------------------------------------------------------------------------
+add_executable(grooveboy ${SOURCES} ${HEADERS} ${WRAPPER_SOURCES})
 
-# Include directories
+set_source_files_properties(${WRAPPER_SOURCES} PROPERTIES GENERATED TRUE)
+
 target_include_directories(grooveboy PRIVATE ${INCLUDE_DIR})
 
-# Add binary data files as embedded resources
-foreach (bin_file ${BINARIES})
-    add_binary_data(grooveboy ${bin_file})
-endforeach ()
-
-# Aggregator target so other things can depend on the .bin step cleanly
-add_custom_target(gbatm_outputs DEPENDS ${BINARIES})
-
-target_sources(
-        grooveboy
-        PRIVATE ${SOURCES}
-        PRIVATE ${HEADERS}
-)
-
-# Convert ELF to GBA ROM
+# ---------------------------------------------------------------------------
+# Post-build: ELF → GBA ROM → gbafix
+# ---------------------------------------------------------------------------
 add_custom_command(
-        TARGET grooveboy POST_BUILD
+        TARGET  grooveboy POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:grooveboy> ${CMAKE_BINARY_DIR}/grooveboy.gba
-        COMMENT "Creating GBA ROM: grooveboy.gba"
+        COMMENT "Creating GBA ROM"
         VERBATIM
 )
 
 add_custom_command(
-        TARGET grooveboy POST_BUILD
+        TARGET  grooveboy POST_BUILD
         COMMAND ${GBAFIX} ${CMAKE_BINARY_DIR}/grooveboy.gba
-        COMMENT "Fixing GBA ROM"
+        COMMENT "Fixing GBA ROM header"
         VERBATIM
 )
 
-# Custom clean target to remove build directory
-set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES "${BUILD_DIR}")
+# ---------------------------------------------------------------------------
+# Clean
+# ---------------------------------------------------------------------------
+set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES "${BIN_DIR};${ASM_DIR}")
